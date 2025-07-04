@@ -6,7 +6,7 @@ Name is inspired by my girlfriend that just gave me a Monster Peachy Keen (<3) w
 
 ### Command support
 
-**fwrite**
+**fwrite**\n
 
 `usage fwrite "string to write to file" filename`
 
