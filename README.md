@@ -7,5 +7,7 @@ Name is inspired by my girlfriend that just gave me a Monster Peachy Keen (<3) w
 ### Command support
 
 **fwrite**
+
 `usage fwrite "string to write to file" filename`
+
 *fwrite currently allows you to write a string to a file, if the file doesn't exist it will create it for you. I know cool right? ^~^*
