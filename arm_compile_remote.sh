@@ -1,30 +1,33 @@
 #!/bin/bash
 
-if [ $# -eq 0 ]
-  then
-    echo "No arguments supplied - Needs arm32 source file and IP of compile server"
+if [ $# -eq 0 ]; then
+    echo "No arguments supplied - Needs arm32 source"
     exit 1
-fi
-
-if [ ! -d "build" ]
-then
-	mkdir build
 fi
 
 UUID=$(uuidgen)
 DIR="arm_build_server/${UUID}/"
 
-FILENAME=$(basename "$1")
+FILEPATH="$1"
+FILENAME=$(basename "$FILEPATH")
 BASENAME="${FILENAME%.*}"
+SRC_DIR=$(dirname "$FILEPATH")
 
-sshpass -p 'asm' ssh asm@pet "mkdir -p /usr/bin/${DIR}"
+REMOTE_DIR="/usr/bin/${DIR}"
 
-sshpass -p 'asm' scp "$1" asm@pet:/usr/bin/$DIR/
+# Create remote directory
+sshpass -p 'asm' ssh asm@pet "mkdir -p ${REMOTE_DIR}"
 
-sshpass -p 'asm' ssh asm@pet "arm-linux-gnueabihf-as -g -o /usr/bin/${DIR}${BASENAME}.o /usr/bin/${DIR}${FILENAME}"
-sshpass -p 'asm' ssh asm@pet "arm-linux-gnueabihf-ld -o /usr/bin/${DIR}${BASENAME} /usr/bin/${DIR}${BASENAME}.o -Ttext=0x10000 --no-dynamic-linker -nostdlib"
+# Copy only contents of the source folder (not the folder itself)
+sshpass -p 'asm' scp -r "${SRC_DIR}/"* asm@pet:"${REMOTE_DIR}"
 
-sshpass -p 'asm' ssh asm@pet "/usr/bin/${DIR}${BASENAME}"
+# Compile and link
+sshpass -p 'asm' ssh asm@pet "arm-linux-gnueabihf-as -g -o ${REMOTE_DIR}${BASENAME}.o ${REMOTE_DIR}${FILENAME}"
+sshpass -p 'asm' ssh asm@pet "arm-linux-gnueabihf-ld -o ${REMOTE_DIR}${BASENAME} ${REMOTE_DIR}${BASENAME}.o -Ttext=0x10000 --no-dynamic-linker -nostdlib"
 
-sshpass -p 'asm' ssh asm@pet "rm -rf /usr/bin/$DIR"
+# Execute the binary
+sshpass -p 'asm' ssh asm@pet "${REMOTE_DIR}${BASENAME}"
+
+# Clean up
+sshpass -p 'asm' ssh asm@pet "rm -rf ${REMOTE_DIR}"
 

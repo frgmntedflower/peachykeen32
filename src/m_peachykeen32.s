@@ -1,6 +1,19 @@
 .section .text
 .global _start
 
+@ ====================== TODOS ==========================
+@	- Replace syscall-4 with wrapper function
+@
+@	- Finish "fwrite" impl.
+@
+@	- Come up with cooler commands t-t
+@
+@	- CMD to create files and directories
+@
+@	- CMD to print file content to stdout
+@
+@ =======================================================
+
 _start: 
 .grrr:
 	bl 	print_prompt
@@ -22,7 +35,22 @@ check_cmd:
 	beq 	fwrite_handle 
 	@ ----- fwrite checks ------
 	
-	
+	@ help checks
+	ldr 	r0, =input_buff
+	ldr 	r1, =help_cmd
+	bl 	better_strcmp
+	cmp 	r0, #1
+	beq 	help_handle	
+	@ ----- help checks ------
+
+	@ exit checks
+	ldr	r0, =input_buff
+	ldr 	r1, =exit_cmd
+	bl 	better_strcmp
+	cmp 	r0, #1
+	beq	exit_succ
+	@ ----- exit checks -------
+
 	cmp 	r6, 	#1	@ If R6 not set to 1, an unkown command was entered 
 	bne	.unknown_cmd
 
@@ -84,6 +112,14 @@ fwrite_handle:
 	svc 	#0
 	bx	lr	@ret
 
+help_handle:
+	mov	r6, #1
+
+	ldr	r1, =help_text
+	ldr	r2, =help_text_len
+	bl 	write_stdout
+	bx	lr
+
 
 @ ===== utils ===== @
 
@@ -123,7 +159,8 @@ write_stdout:
 .section .rodata
 	prompt: .ascii "peachykeen32> "
 	prompt_len = .-prompt
-	help_cmd: .asciz "Commands: nothing rn ^~^"
+	help_text: .asciz "Commands: nothing rn \^\~\^ \n"
+	help_text_len = .-help_text
 	.equ input_buff_size, 100
 	.comm input_buff, input_buff_size
 	unknown_msg: .asciz "Unknown command \>\~\< \n"
@@ -132,5 +169,9 @@ write_stdout:
 	@ == command reserved keywords ==
 	fwrite_cmd: .asciz "fwrite"
 	fwrite_cmd_len = .-fwrite_cmd
+	
+	exit_cmd: .asciz "exit"
+	exit_cmd_len = .-exit_cmd
 
-
+	help_cmd: .asciz "help"
+	help_cmd_len = .-help_cmd
