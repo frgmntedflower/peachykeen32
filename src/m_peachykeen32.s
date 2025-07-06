@@ -13,7 +13,10 @@
 @	- CMD to print file content to stdout
 @
 @ =======================================================
+.section .bss
+	.lcomm rand_buff, 4	@ 4 bytes for reading the urandom file
 
+.section .text
 _start: 
 .grrr:
 	bl 	print_prompt
@@ -33,7 +36,7 @@ check_cmd:
 	bl 	better_strcmp
 	cmp 	r0, #1
 	beq 	fwrite_handle 
-	@ ----- fwrite checks ------
+	@ ----- fwrite checks -----
 	
 	@ help checks
 	ldr 	r0, =input_buff
@@ -41,7 +44,7 @@ check_cmd:
 	bl 	better_strcmp
 	cmp 	r0, #1
 	beq 	help_handle	
-	@ ----- help checks ------
+	@ ----- help checks -----
 
 	@ exit checks
 	ldr	r0, =input_buff
@@ -49,7 +52,15 @@ check_cmd:
 	bl 	better_strcmp
 	cmp 	r0, #1
 	beq	exit_succ
-	@ ----- exit checks -------
+	@ ----- exit checks -----
+
+	@ rng checks
+	ldr	r0, =input_buff
+	ldr 	r1, =rand_cmd
+	bl	better_strcmp
+	cmp	r0, #1
+	beq	rand_handle
+	@ ----- rand checks -----
 
 	cmp 	r6, 	#1	@ If R6 not set to 1, an unkown command was entered 
 	bne	.unknown_cmd
@@ -120,9 +131,13 @@ help_handle:
 	bl 	write_stdout
 	bx	lr
 
+rand_handle:
+	mov	r6, #1
+
+	bl	rand
+	bx	lr
 
 @ ===== utils ===== @
-
 @ better_strcmp
 @ desc - Better version of strcpy ^~^
 @ arg1 - r0 = ptr to first string
@@ -154,6 +169,27 @@ write_stdout:
 	svc 	#0
 	bx 	lr
 
+@ rand
+@ generate random number :3
+rand:
+	mov	r7, #322
+	mov	r0, #-100
+	ldr	r1, =dev_urandom
+	mov	r2, #0
+	mov	r3, #0
+	svc 	#0
+	mov 	r4, r0
+
+	mov	r0, r4
+	mov	r7, #3
+	ldr	r1, =rand_buff	
+	mov	r2, #4
+	svc	#0
+
+	ldr	r1, =rand_buff
+	mov	r2, #4
+	bl	write_stdout
+	bx 	lr
 
 @ ================== Data Section ===================== @
 .section .rodata
@@ -165,7 +201,9 @@ write_stdout:
 	.comm input_buff, input_buff_size
 	unknown_msg: .asciz "Unknown command \>\~\< \n"
 	unknown_msg_len = .-unknown_msg
+	dev_urandom: .asciz "/dev/urandom"
 
+	
 	@ == command reserved keywords ==
 	fwrite_cmd: .asciz "fwrite"
 	fwrite_cmd_len = .-fwrite_cmd
@@ -175,3 +213,8 @@ write_stdout:
 
 	help_cmd: .asciz "help"
 	help_cmd_len = .-help_cmd
+
+	rand_cmd: .asciz "rand"
+	rand_cmd_len = .-rand_cmd
+
+
