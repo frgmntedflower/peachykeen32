@@ -139,6 +139,11 @@ help_handle:
 	ldr	r2, =help_text_len
 	bl 	write_stdout
 	bx	lr
+rand_handle:
+	mov	r6, #1
+
+	bl	rand
+	bx	lr
 
 ndir_handle:
 @ mkdir wrapper
@@ -147,12 +152,6 @@ ndir_handle:
 	mov	r7, #0x27 
 	ldr	r1, =ndir_cmd
 	ldr	r2, =ndir_cmd_len
-
-rand_handle:
-	mov	r6, #1
-
-	bl	rand
-	bx	lr
 
 
 @ ===== utils ===== @
