@@ -52,8 +52,16 @@ check_cmd:
 	bl 	better_strcmp
 	cmp 	r0, #1
 	beq	exit_succ
-	@ ----- exit checks -----
+	@ ----- exit checks -------
 
+	@ ndir checks
+	ldr	r0, =input_buff
+	ldr 	r1, =ndir_cmd
+	bl 	better_strcmp
+	cmp 	r0, #1
+	beq	ndir_handle
+	@ ----- ndir checks -------
+	
 	@ rng checks
 	ldr	r0, =input_buff
 	ldr 	r1, =rand_cmd
@@ -61,6 +69,7 @@ check_cmd:
 	cmp	r0, #1
 	beq	rand_handle
 	@ ----- rand checks -----
+
 
 	cmp 	r6, 	#1	@ If R6 not set to 1, an unkown command was entered 
 	bne	.unknown_cmd
@@ -131,11 +140,20 @@ help_handle:
 	bl 	write_stdout
 	bx	lr
 
+ndir_handle:
+@ mkdir wrapper
+	move 	r6, #1
+
+	mov	r7, #0x27 
+	ldr	r1, =ndir_cmd
+	ldr	r2, =ndir_cmd_len
+
 rand_handle:
 	mov	r6, #1
 
 	bl	rand
 	bx	lr
+
 
 @ ===== utils ===== @
 @ better_strcmp
@@ -151,6 +169,10 @@ better_strcmp:
 	bne 	.done 
 	cmp 	r2, #0		@ if we reach null term, string should be same
 	bne 	.loop		@ if not, we go recursive t~t
+
+	cmp 	r2, =space_char	@ if we see space it has, string should be same
+	bne 	.loop		@ if not, we go recursive t~t
+
 
 	mov 	r0, #1
 	bx 	lr
@@ -191,6 +213,14 @@ rand:
 	bl	write_stdout
 	bx 	lr
 
+@ parse_arg 
+@ desc - Extract the first argument of a used commmand  
+@ args - r0 = input used
+parse_arg: 
+	
+
+	bx 	lr
+
 @ ================== Data Section ===================== @
 .section .rodata
 	prompt: .ascii "peachykeen32> "
@@ -201,6 +231,7 @@ rand:
 	.comm input_buff, input_buff_size
 	unknown_msg: .asciz "Unknown command \>\~\< \n"
 	unknown_msg_len = .-unknown_msg
+	space_char: .ascii ' '
 	dev_urandom: .asciz "/dev/urandom"
 
 	
@@ -214,7 +245,8 @@ rand:
 	help_cmd: .asciz "help"
 	help_cmd_len = .-help_cmd
 
+	ndir_cmd: .asciz "ndir"
+	ndir_cmd_len = .-ndir_cmd
+
 	rand_cmd: .asciz "rand"
 	rand_cmd_len = .-rand_cmd
-
-
