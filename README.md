@@ -23,6 +23,3 @@ fwrite "string to write to file" filename
 more coming soon~
 
 ---
-big monster
-
-![image](https://github.com/user-attachments/assets/8c87c7b4-a342-4b0b-8d7a-051fac648208)
