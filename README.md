@@ -4,22 +4,42 @@ Name inspired by my girlfriend (<3) who just gave me a Monster Peachy Keen which
 
 ---
 
-## Awesome features
+## ✨ Features
 
-### Command support
+- REPL-style input loop (`peachykeen32>`)
+- Direct syscall usage (no libc!)
+- Custom string parsing and argument buffers
+- Up to 3 space-separated arguments supported per command
+- Easily extendable command structure
+- Works in QEMU or on bare-metal ARM32
 
-#### `fwrite`
+## 💻 Commands
 
-**Usage:**
+### help
+Prints a list of available commands and how to use them.
 
-fwrite "string to write to file" filename
+### exit
+Exits the shell (calls exit(0) via syscall 1).
 
-**Description:**
+### fwrite <text> <filename>
+Writes <text> to <filename>. If the file doesn’t exist, it’ll be created.
 
-`fwrite` currently allows you to write a string to a file. If the file doesn't exist, it will create it for you. I know, cool right? ^~^*
+Example:
+fwrite "Hello ARM world" hello.txt
+
+### ndir <dirname>
+Creates a new directory with the given name. (WIP)
+
+Example:
+ndir testfolder
+
+### rand
+Prints 16 bytes of entropy from /dev/urandom.
 
 ---
 
-more coming soon~
+⚠️ Disclaimer
+
+This is a toy shell made for fun and low-level exploration. It will yell at you, crash on unknown commands, and has no interest in POSIX compliance. You’ve been warned.
 
 ---
