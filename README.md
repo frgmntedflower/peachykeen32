@@ -1,7 +1,5 @@
 # PeachyKeen32 (sh)
 
-Name inspired by my girlfriend (<3) who just gave me a Monster Peachy Keen which is so good that I had to write a shell in ARM.
-
 ---
 
 ## ✨ Features
